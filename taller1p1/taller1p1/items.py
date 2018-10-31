@@ -7,8 +7,12 @@
 
 import scrapy
 
-
 class Taller1P1Item(scrapy.Item):
+    autor	= scrapy.Field()
+    cita 	= scrapy.Field()
+    tags	= scrapy.Field()
+
+#class Taller1P1Item(scrapy.Item):
     # define the fields for your item here like:
     # name = scrapy.Field()
-    pass
+#    pass
