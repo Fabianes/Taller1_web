@@ -67,6 +67,7 @@ ROBOTSTXT_OBEY = True
 # See https://doc.scrapy.org/en/latest/topics/item-pipeline.html
 ITEM_PIPELINES = {
     'taller1p1.pipelines.formatoQuote': 300,
+    'taller1p1.pipelines.SQliteCitasPipeline'	: 400,
 }
 
 # Enable and configure the AutoThrottle extension (disabled by default)
