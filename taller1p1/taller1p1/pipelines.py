@@ -11,6 +11,10 @@
 
 import sqlite3
 
+from scrapy.exporters import BaseItemExporter
+from scrapy.utils.serialize import ScrapyJSONEncoder
+from scrapy.utils.python import to_bytes
+
 class formatoQuote(object):
 
 	def process_item(self, item, spider):
@@ -27,7 +31,7 @@ class SQliteCitasPipeline(object):
 		#db = Accesobd()
 		#db.setupDBCon()
 
-		self.con = sqlite3.connect('quotesscrapy2.sqlite')
+		self.con = sqlite3.connect('quotes-bd.sqlite')
 		self.cur = self.con.cursor()
 
 		id_autor = self.cur.execute("SELECT id FROM Autor WHERE nombre=?",(item['autor'],))
@@ -81,3 +85,49 @@ class SQliteCitasPipeline(object):
 
 	def buscarAutor(self,item):
 		return self.cur.execute("SELECT * FROM Autor WHERE id=1")
+
+class SqliteItemExporter(BaseItemExporter):
+
+	def __init__(self, file, **kwargs):
+		self._configure(kwargs, dont_fail=True)
+		self.file = file
+		self.encoder = ScrapyJSONEncoder(**kwargs)
+		self.first_item = True
+
+	def export_item(self, item):
+		if self.first_item:
+			self.first_item = False
+		else:
+			
+			#itemdict = dict(self._get_serialized_fields(item))
+			#self.file.write(to_bytes(self.encoder.encode(itemdict)))
+			self.file.write(item.encode('utf-8'))
+			self.file.write(b';\n')
+
+class SqliteExportPipeline(object):
+	def __init__(self, file_name):
+		self.file_name = file_name
+		self.file_handle = None
+
+	def from_crawler(cls, crawler):
+		output_file_name = crawler.settings.get('FILE_NAME')
+
+		return cls(output_file_name)
+
+	def open_spider(self, spider):
+		file = open(self.file_name, 'wb')
+		self.file_handle = file
+		self.exporter = SqliteItemExporter(file)
+    
+	def close_spider(self, spider):
+		self.file_handle.close()
+
+	def process_item(self, item, spider):
+		cita = item['cita']
+		cita = cita.replace('"','')
+		query_item_autor = "INSERT OR IGNORE INTO Autor(nombre) VALUES(\"%s\");\nINSERT INTO Cita(id_autor,cuerpo) VALUES((SELECT id FROM Autor WHERE nombre=\"%s\"),\"%s\")" % (item['autor'],item['autor'], cita)
+		self.exporter.export_item(query_item_autor)
+
+		#query_item_cita = "INSERT INTO Cita(id_autor,cuerpo) VALUES((SELECT id FROM Autor WHERE nombre=\"%s\"),\"%s\")" % (item['autor'], item['cita'])
+		#self.exporter.export_item(query_item_cita)
+		return item
