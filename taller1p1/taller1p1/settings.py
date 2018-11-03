@@ -67,10 +67,10 @@ ROBOTSTXT_OBEY = True
 # See https://doc.scrapy.org/en/latest/topics/item-pipeline.html
 FILE_NAME = './exportSqlite.sqlite'
 ITEM_PIPELINES = {
-	#'taller1p1.pipelines.formatoQuote'			: 300,
-	#'taller1p1.pipelines.SQliteCitasPipeline'	: 400,
+	'taller1p1.pipelines.formatoQuote'			: 300,
+	'taller1p1.pipelines.SQliteCitasPipeline'	: 400,
 	'taller1p1.pipelines.SqliteExportPipeline'	: 500,
-	#'taller1p1.pipelines.FanExportPipeline' : 600,
+	#'taller1p1.pipelines.SQliteCitas2Pipeline'	: 600,
 
 
 }

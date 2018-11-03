@@ -86,6 +86,43 @@ class SQliteCitasPipeline(object):
 	def buscarAutor(self,item):
 		return self.cur.execute("SELECT * FROM Autor WHERE id=1")
 
+class SQliteCitas2Pipeline(object):
+
+
+	def process_item(self, item, spider):
+		#db = Accesobd()
+		#db.setupDBCon()
+		cita = item['cita']
+		cita = cita.replace('"','')
+
+		self.con = sqlite3.connect('quotes-bd.sqlite')
+		self.cur = self.con.cursor()
+
+		self.cur.execute("INSERT OR IGNORE INTO Autor(nombre) VALUES(?)",(item['autor'],))
+		self.con.commit()
+
+		self.cur.execute("INSERT INTO Cita(id_autor,cuerpo) VALUES((SELECT id FROM Autor WHERE nombre=?),?)",(item['autor'],item['cita']))
+		self.con.commit()
+
+		for tag in item['tags']:
+			self.cur.execute("INSERT OR IGNORE INTO Etiqueta(nombre) VALUES(?)",(tag,))
+			self.con.commit()
+
+			self.cur.execute("INSERT INTO Cita_etiqueta(id_cita,id_etiqueta) VALUES((SELECT id FROM Cita WHERE cuerpo=?),(SELECT id FROM Etiqueta WHERE nombre=?))",(cita,tag))
+			self.con.commit()
+		
+		#self.datosDB(item)
+		self.con.close()
+		return item
+
+	def datosDB(self,item):
+		id_autor = self.buscarAutor(item)
+		print "asdasdsad",id_autor.fetchall()
+
+
+	def buscarAutor(self,item):
+		return self.cur.execute("SELECT * FROM Autor WHERE id=1")
+
 class SqliteItemExporter(BaseItemExporter):
 
 	def __init__(self, file, **kwargs):
