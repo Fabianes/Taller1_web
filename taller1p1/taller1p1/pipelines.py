@@ -103,12 +103,14 @@ class SqliteItemExporter(BaseItemExporter):
 			#self.file.write(to_bytes(self.encoder.encode(itemdict)))
 			self.file.write(item.encode('utf-8'))
 			self.file.write(b';\n')
+			return 1
 
 class SqliteExportPipeline(object):
 	def __init__(self, file_name):
 		self.file_name = file_name
 		self.file_handle = None
 
+	@classmethod
 	def from_crawler(cls, crawler):
 		output_file_name = crawler.settings.get('FILE_NAME')
 
@@ -125,9 +127,14 @@ class SqliteExportPipeline(object):
 	def process_item(self, item, spider):
 		cita = item['cita']
 		cita = cita.replace('"','')
-		query_item_autor = "INSERT OR IGNORE INTO Autor(nombre) VALUES(\"%s\");\nINSERT INTO Cita(id_autor,cuerpo) VALUES((SELECT id FROM Autor WHERE nombre=\"%s\"),\"%s\")" % (item['autor'],item['autor'], cita)
-		self.exporter.export_item(query_item_autor)
 
-		#query_item_cita = "INSERT INTO Cita(id_autor,cuerpo) VALUES((SELECT id FROM Autor WHERE nombre=\"%s\"),\"%s\")" % (item['autor'], item['cita'])
-		#self.exporter.export_item(query_item_cita)
+		flag = 0
+
+		query_item_autor_cita = "INSERT OR IGNORE INTO Autor(nombre) VALUES(\"%s\");\nINSERT INTO Cita(id_autor,cuerpo) VALUES((SELECT id FROM Autor WHERE nombre=\"%s\"),\"%s\")" % (item['autor'],item['autor'], cita)
+		flag = self.exporter.export_item(query_item_autor_cita)
+
+		if flag == 1:
+			for tag in item['tags']:
+				query_item_etiqueta = "INSERT OR IGNORE INTO Etiqueta(nombre) VALUES(\"%s\");\nINSERT INTO Cita_etiqueta(id_cita,id_etiqueta) VALUES((SELECT id FROM Cita WHERE cuerpo=\"%s\"),(SELECT id FROM Etiqueta WHERE nombre=\"%s\"))" % (tag,cita,tag)
+				self.exporter.export_item(query_item_etiqueta)
 		return item

@@ -65,11 +65,14 @@ ROBOTSTXT_OBEY = True
 
 # Configure item pipelines
 # See https://doc.scrapy.org/en/latest/topics/item-pipeline.html
-FILE_NAME = './exportSQlite.sqlite'
+FILE_NAME = './exportSqlite.sqlite'
 ITEM_PIPELINES = {
 	#'taller1p1.pipelines.formatoQuote'			: 300,
 	#'taller1p1.pipelines.SQliteCitasPipeline'	: 400,
 	'taller1p1.pipelines.SqliteExportPipeline'	: 500,
+	#'taller1p1.pipelines.FanExportPipeline' : 600,
+
+
 }
 
 # Enable and configure the AutoThrottle extension (disabled by default)
