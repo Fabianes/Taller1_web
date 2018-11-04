@@ -2,7 +2,7 @@ import scrapy
 from taller1p1.items import Taller1P1Item
 
 class QuotesSpider(scrapy.Spider):
-	name = "aranita quotes v5"
+	name = "arana quotes"
 
 	start_urls = [
 		"http://quotes.toscrape.com/page/1"
